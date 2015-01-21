@@ -14,7 +14,7 @@
 
 <div class="medium-6 large-4 columns">
 
-![](http://lorempixel.com/250/250/people)
+![](http://lorempixel.com/250/250/people/9)
 
 </div>
 </div>

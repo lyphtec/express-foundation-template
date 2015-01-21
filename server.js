@@ -47,9 +47,15 @@ app.use(mds.middleware({
     }
 }));
 
-// error handling middleware should be loaded after the routes
+// error handling middleware should be loaded last
+// log for all environments
+app.use(function(err, req, res, next) {
+    winston.error(req.method + ' ' + req.url + ': ' + err.stack);
+    next(err);
+});
+
 if ('development' === app.get('env')) {
-    app.use(errorHandler({log: errorNotification}));
+    app.use(errorHandler());
     app.set('host', 'http://localhost');
 }
 
@@ -61,9 +67,3 @@ app.listen(app.get('port'), function() {
     winston.info('Server started');
 });
 
-
-// Privates
-function errorNotification(err, str, req, res) {
-    console.error(str);
-    winston.error(req.method + ' ' + req.url + ': ' + str);
-}

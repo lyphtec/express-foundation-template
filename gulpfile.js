@@ -1,3 +1,5 @@
+// Uses some ideas from https://gist.github.com/kevinSuttle/c8b198aaa30349088c35
+
 var gulp = require('gulp');
 var pkg = require('./package.json');
 var common = require('./common/common');
@@ -6,7 +8,10 @@ var del           = require('del'),
     sass          = require('gulp-sass'),
     sourcemaps    = require('gulp-sourcemaps'),
     tap           = require('gulp-tap'),
-    autoprefixer  = require('gulp-autoprefixer');
+    autoprefixer  = require('gulp-autoprefixer'),
+    browserSync   = require('browser-sync'),
+    reload        = browserSync.reload,
+    nodemon       = require('gulp-nodemon');
 
 // Auto load all gulp plugins
 var plug = require('gulp-load-plugins')();
@@ -39,9 +44,10 @@ gulp.task('sass', function() {
                .pipe(sass({
                    includePaths: pkg.paths.source.sass,
                    outputStyle: 'nested'
-               }))
+               }, { errLogToConsole: true }))
                .pipe(autoprefixer())
-               .pipe(gulp.dest(pkg.paths.dest.css));
+               .pipe(gulp.dest(pkg.paths.dest.css))
+               .pipe(reload({stream: true}));
 });
 
 gulp.task('css', ['sass'], function() {
@@ -63,4 +69,29 @@ gulp.task('clean', function(cb) {
 
         cb();
     });
+});
+
+gulp.task('build', ['clean', 'css'], function() {
+    _.log(_.colors.green('App re-built'));
+});
+
+gulp.task('nodemon', function(cb) {
+    var called = false;
+    return nodemon({script: pkg.main}).on('start', function() {
+        if (!called) {
+            _.log(_.colors.green('Starting nodemon..'));
+            called = true;
+            cb();
+        }
+    });
+});
+
+gulp.task('browser-sync', ['nodemon'], function() {
+    browserSync.init(null, {
+        proxy: 'http://localhost:3000'
+    });
+});
+
+gulp.task('default', ['build', 'browser-sync'], function() {
+    gulp.watch([pkg.paths.source.sassMain], ['sass']);
 });

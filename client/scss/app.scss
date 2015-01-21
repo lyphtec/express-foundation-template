@@ -40,7 +40,7 @@ body {
 }
 
 .hero {
-    background: url("http://lorempixel.com/1800/1200/nature");
+    background: url("http://lorempixel.com/1300/800/nature");
     background-size: cover;
     box-shadow: inset 0px 0px 0 2000px rgba(0,0,0,0.15);
     height: 80%;
@@ -84,6 +84,11 @@ body {
     .intro-text{
         padding-top: 18%;
     }
+}
+
+.contain-to-grid,
+.top-bar {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .about, .work, .contact {
