@@ -16,7 +16,7 @@ var app = express();
 app.locals.isProd = (app.get('env') === 'production');
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 5000);
 app.set('views', path.join(__dirname, 'server/views'));
 app.set('view engine', 'vash');
 app.use(favicon(__dirname + '/client/favicon.ico'));

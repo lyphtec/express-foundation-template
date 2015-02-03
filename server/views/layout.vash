@@ -72,14 +72,13 @@
             </div>
         </footer>
 
-        <script src="lib/jquery/dist/jquery.min.js"></script>
 
         @if (model.isProd) {
+        <script src="lib/jquery/dist/jquery.min.js"></script>
         <script src="lib/foundation/js/foundation.min.js"></script>
-        <script src="js/app.min.js"></script>
         } else {
+        <script src="lib/jquery/dist/jquery.js"></script>
         <script src="lib/foundation/js/foundation.js"></script>
-        <script src="js/app.js"></script>
         }
 
         <script>
@@ -88,6 +87,12 @@
             var doc = document.documentElement;
             doc.setAttribute('data-useragent', navigator.userAgent);
         </script>
+
+        @if (model.isProd) {
+        <script src="js/app.min.js"></script>
+        } else {
+        <script src="js/app.js"></script>
+        }
 
         <!--
         <script>

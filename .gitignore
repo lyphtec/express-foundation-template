@@ -2,7 +2,6 @@ node_modules
 iisnode
 obj/
 scratchpad.js
-logs/
 client/lib/
 
 #################

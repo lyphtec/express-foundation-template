@@ -39,6 +39,21 @@ gulp.task('jshint', function() {
                .pipe(plug.jshint.reporter('jshint-stylish'));
 });
 
+gulp.task('js', ['jshint'], function() {
+    return gulp.src(pkg.paths.source.js)
+               .pipe(plug.size({showFiles: true}))
+               .pipe(sourcemaps.init())
+               .pipe(plug.uglify())
+               .pipe(plug.header(commentHeader))
+               .pipe(tap(function(file,t) {
+                    file.path = file.path.replace(/\.js$/, '.min.js');  // using gulp-tap to create a .min.js file with same name in same folder
+               }))
+               .pipe(sourcemaps.write('.'))
+               .pipe(gulp.dest(pkg.paths.dest.js))
+               .pipe(plug.size({showFiles: true}));
+});
+
+// converting sass to css
 gulp.task('sass', function() {
     return gulp.src(pkg.paths.source.sassMain)
                .pipe(sass({
@@ -50,6 +65,7 @@ gulp.task('sass', function() {
                .pipe(reload({stream: true}));
 });
 
+// css minify & bundling
 gulp.task('css', ['sass'], function() {
     return gulp.src(pkg.paths.source.css)
                .pipe(plug.size({showFiles: true}))
@@ -63,7 +79,7 @@ gulp.task('css', ['sass'], function() {
 });
 
 gulp.task('clean', function(cb) {
-    del([pkg.paths.dest.css], function(err, paths) {
+    del([pkg.paths.dest.css, pkg.paths.dest.js + '/*.min.js', pkg.paths.dest.js + '/*.map'], function(err, paths) {
         var msg = 'Deleted files/folders:\n' + paths.join('\n');
         _.log(_.colors.yellow(msg));
 
@@ -71,11 +87,11 @@ gulp.task('clean', function(cb) {
     });
 });
 
-gulp.task('build', ['clean', 'css'], function() {
+gulp.task('build', ['clean', 'css', 'js'], function() {
     _.log(_.colors.green('App re-built'));
 });
 
-gulp.task('nodemon', function(cb) {
+gulp.task('nodemon', ['build'], function(cb) {
     var called = false;
     return nodemon({script: pkg.main}).on('start', function() {
         if (!called) {
@@ -88,10 +104,10 @@ gulp.task('nodemon', function(cb) {
 
 gulp.task('browser-sync', ['nodemon'], function() {
     browserSync.init(null, {
-        proxy: 'http://localhost:3000'
+        proxy: 'http://localhost:5000'
     });
 });
 
-gulp.task('default', ['build', 'browser-sync'], function() {
+gulp.task('default', ['browser-sync'], function() {
     gulp.watch([pkg.paths.source.sassMain], ['sass']);
 });
