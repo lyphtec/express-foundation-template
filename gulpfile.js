@@ -11,6 +11,7 @@ var del           = require('del'),
     autoprefixer  = require('gulp-autoprefixer'),
     browserSync   = require('browser-sync'),
     reload        = browserSync.reload,
+    runSequence   = require('run-sequence'),
     nodemon       = require('gulp-nodemon');
 
 // Auto load all gulp plugins
@@ -61,8 +62,7 @@ gulp.task('sass', function() {
                    outputStyle: 'nested'
                }, { errLogToConsole: true }))
                .pipe(autoprefixer())
-               .pipe(gulp.dest(pkg.paths.dest.css))
-               .pipe(reload({stream: true}));
+               .pipe(gulp.dest(pkg.paths.dest.css));
 });
 
 // css minify & bundling
@@ -87,8 +87,10 @@ gulp.task('clean', function(cb) {
     });
 });
 
-gulp.task('build', ['clean', 'css', 'js'], function() {
-    _.log(_.colors.green('App re-built'));
+gulp.task('build', function(cb) {
+    runSequence('clean',
+                ['css'],
+                cb);
 });
 
 gulp.task('nodemon', ['build'], function(cb) {
@@ -108,6 +110,11 @@ gulp.task('browser-sync', ['nodemon'], function() {
     });
 });
 
+function reportChange(event){
+  _.log('File ' + _.colors.green(event.path) + ' was ' + _.colors.yellow(event.type) + ', running tasks...');
+}
+
 gulp.task('default', ['browser-sync'], function() {
-    gulp.watch([pkg.paths.source.sassMain], ['sass']);
+    gulp.watch(pkg.paths.source.sassMain, ['sass', reload({stream: true})]).on('change', reportChange);
+    //gulp.watch(pkg.paths.source.js, ['js', reload({stream: true})]).on('change', reportChange);
 });

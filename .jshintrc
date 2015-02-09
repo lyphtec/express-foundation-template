@@ -1,5 +1,6 @@
 {
     "node": true,
+    "esnext": true,
     "jquery": true,
     "browser": true, // Standard browser globals e.g. `window`, `document`.
     "bitwise": true,
