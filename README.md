@@ -2,6 +2,8 @@
 
 Starter template for a [Foundation](http://foundation.zurb.com/) based site running on [Express](http://expressjs.com/) (Node / io.js).
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lyphtec/express-foundation-template?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 
 ## Overview
 
@@ -9,8 +11,15 @@ This is a starter / skeleton / boilerplate template for a Foundation site runnin
 
 It allows you to quickly setup a starting Foundation based site with reasonable defaults as well as typical server-side configurations when building Express-based sites.
 
-It uses [jspm](http://jspm.io/) as the browser package manager and assumes you have it installed globally, i.e. `npm install -g jspm`
 
+## Requirements
+
+This uses [jspm](http://jspm.io/) as the browser package manager and [gulp](http://gulpjs.com/) for build automation during development so you should have these installed globally
+
+```bash
+npm install -g jspm
+npm install -g gulp
+```
 
 ## How to use
 
@@ -42,7 +51,11 @@ It uses [jspm](http://jspm.io/) as the browser package manager and assumes you h
   * client/scss/app.scss        - (main Sass file used by site)
   * client/js/*.js              - (site Javascript files - ES6 supported & recommended!)
   * content/*.md                - (put your site content Markdown files here - it will be served up my markdown-serve. hint: symbolically link this to a folder on DropBox!)
+  * package.json                - (name, author, homepage, version..)
+  * common/common.js            - (header details that gets injected into compiled css & js on gulp build)
   ```
+
+- `gulp` (default command) - builds, runs nodemon ([gulp-nodemon](https://github.com/JacksonGariety/gulp-nodemon)), then [BrowserSync](http://www.browsersync.io/), and should automatically serve up site at [http://localhost:3000](http://localhost:3000).
 
 ## Notable Features
 
@@ -50,17 +63,19 @@ It uses [jspm](http://jspm.io/) as the browser package manager and assumes you h
 
 - [jspm](http://jspm.io/) for browser package management
 - [ES6 support](https://github.com/lukehoban/es6features) (since we are using jspm) - recommended way of writing client-side Javascript.
-- Sass (SCSS to be exact)
+- Sass (SCSS to be exact) via [gulp-sass](https://github.com/dlmanning/gulp-sass)
 
 ### Server-side
 
 - [Vash](https://github.com/kirbysayshi/vash) as default view-engine in Express
-- [markdown-serve](http://lyphtec.github.io/markdown-serve/) for website content stored as Markdown
-- [winston](https://github.com/winstonjs/winston) as logging framework. Includes a custom [logger](https://github.com/lyphtec/express-foundation-template/blob/master/server/logger.js) that logs each log type in a separate file in the `logs` folder.
+- [markdown-serve](http://lyphtec.github.io/markdown-serve/) for serving of website content stored as Markdown
+- [winston](https://github.com/winstonjs/winston) as logging framework. Includes a custom [logger](https://github.com/lyphtec/express-foundation-template/blob/master/server/logger.js) that logs each log type in a separate file per day in the `logs` folder.
 
 ### Development
 
-- [Gulp](http://gulpjs.com/)
+- [Gulp](http://gulpjs.com/) tasks:
+  - *default* (i.e. `gulp` without any arguments) - builds, runs nodemon, BrowserSync, starts up browser pointing to [https://localhost:3000](https://localhost:3000), and watches for changes
+  - *build* - removes `/client/css/*` & `/client/app*` files, then runs `css` task to compile `/client/scss/app.scss` & minify resulting CSS file to `/client/css/app.min.css`, also runs the `js` task to transpile as single bundled ES5 `/client/app.js` file & minifies to `/client/app.min.js`
 - [BrowserSync](http://www.browsersync.io/) - automatic browser reloads when changes are detected during development
 
 
@@ -88,13 +103,12 @@ It uses [jspm](http://jspm.io/) as the browser package manager and assumes you h
 - `common/common.js` - Used by the gulp task in bundling & minifying CSS/JS files to inject header information. Change this to your details.
 
 
-## Miscellaneous Notes
+## Production Deployment
 
-The Foundation package on the [jspm registry](https://github.com/jspm/registry/blob/master/package-overrides/github/zurb/bower-foundation%405.0.2.json) is a bit outdated and does not include the Sass source files. While [this pull request](https://github.com/jspm/registry/pull/177) is awaiting approval, you will need to do the following to install Foundation:
+For production environment, a [self-executing bundle is created](https://github.com/jspm/jspm-cli/wiki/Production-Workflows#creating-a-self-executing-bundle) by transpiling into a single ES5 JS file (`/client/app.min.js`).  This file is referenced in the `/server/views/layout.vash` layout view and will be used when the prod flag is true.
 
-```bash
-jspm install github:zurb/bower-foundation -o "{ main: 'js/foundation/foundation', shim: { 'js/foundation/foundation.*': './foundation', 'js/foundation/foundation': ['jquery', '../vendor/modernizr', '../vendor/fastclick'] }, ignore: [], buildConfig: { uglify: true } }" --force
-```
+It is assumed that the contents of the repo will be deployed on a server that doesn't have `gulp` available so no gulp tasks will be run after deployment on the target server - thus no bundling or minifying.  All dev dependencies will not be installed (equivalent to `npm install --production`). Therefore, it is best to run `gulp build` to update all CSS & JS resources before pushing to production.
+
 
 ## License
 

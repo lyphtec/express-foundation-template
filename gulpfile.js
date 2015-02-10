@@ -7,15 +7,39 @@ var common = require('./common/common');
 var del           = require('del'),
     sass          = require('gulp-sass'),
     sourcemaps    = require('gulp-sourcemaps'),
-    tap           = require('gulp-tap'),
     autoprefixer  = require('gulp-autoprefixer'),
     browserSync   = require('browser-sync'),
     reload        = browserSync.reload,
+    tap           = require('gulp-tap'),
     runSequence   = require('run-sequence'),
+    exec          = require('child_process').exec,
     nodemon       = require('gulp-nodemon');
 
 // Auto load all gulp plugins
 var plug = require('gulp-load-plugins')();
+
+// Paths
+var paths = {
+    source: {
+        root: './client',
+        css: [
+            './client/css/**/*.css',
+            '!./client/css/**/*.min.css'
+        ],
+        sass: [
+            './client/scss',
+            './client/lib/github/zurb/bower-foundation@5.5.1/scss'
+        ],
+        sassMain: './client/scss/app.scss',
+        js: './client/**/*.js',
+        jsMain: './client/app.js'
+    },
+    dest: {
+        css: './client/css',
+        cssMain: 'app.min.css',
+        jsMain: './client/app.min.js'
+    }
+};
 
 // Load common utils
 var _ = plug.loadUtils(['colors', 'env', 'log', 'date']);
@@ -33,53 +57,60 @@ _.beep();
 // TASKS
 // ----------------------------
 
-// Js linter
+// Js linter -- currently not used!
 gulp.task('jshint', function() {
-    return gulp.src(pkg.paths.source.js)
+    return gulp.src(paths.source.jsMain)
                .pipe(plug.jshint('.jshintrc'))
                .pipe(plug.jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('js', ['jshint'], function() {
-    return gulp.src(pkg.paths.source.js)
+// uses jspm to create a self-executing bundle at /client/app.js
+gulp.task('jspmBundle', function(cb) {
+    exec('jspm bundle-sfx app/main ' + paths.source.jsMain, function(err) {
+        if (err) return cb(err);
+        cb();
+    });
+});
+
+// js minify & header injection
+gulp.task('js', ['jspmBundle'], function() {
+    return gulp.src(paths.source.jsMain)
                .pipe(plug.size({showFiles: true}))
-               .pipe(sourcemaps.init())
                .pipe(plug.uglify())
                .pipe(plug.header(commentHeader))
                .pipe(tap(function(file,t) {
                     file.path = file.path.replace(/\.js$/, '.min.js');  // using gulp-tap to create a .min.js file with same name in same folder
                }))
-               .pipe(sourcemaps.write('.'))
-               .pipe(gulp.dest(pkg.paths.dest.js))
+               .pipe(gulp.dest(paths.source.root))
                .pipe(plug.size({showFiles: true}));
 });
 
 // converting sass to css
 gulp.task('sass', function() {
-    return gulp.src(pkg.paths.source.sassMain)
+    return gulp.src(paths.source.sassMain)
                .pipe(sass({
-                   includePaths: pkg.paths.source.sass,
+                   includePaths: paths.source.sass,
                    outputStyle: 'nested'
                }, { errLogToConsole: true }))
                .pipe(autoprefixer())
-               .pipe(gulp.dest(pkg.paths.dest.css));
+               .pipe(gulp.dest(paths.dest.css));
 });
 
 // css minify & bundling
 gulp.task('css', ['sass'], function() {
-    return gulp.src(pkg.paths.source.css)
+    return gulp.src(paths.source.css)
                .pipe(plug.size({showFiles: true}))
                .pipe(sourcemaps.init())
                .pipe(plug.minifyCss({}))
-               .pipe(plug.concat(pkg.paths.dest.cssMain))
+               .pipe(plug.concat(paths.dest.cssMain))
                .pipe(plug.header(commentHeader))
                .pipe(sourcemaps.write('.'))
-               .pipe(gulp.dest(pkg.paths.dest.css))
+               .pipe(gulp.dest(paths.dest.css))
                .pipe(plug.size({showFiles: true}));
 });
 
 gulp.task('clean', function(cb) {
-    del([pkg.paths.dest.css, pkg.paths.dest.js + '/*.min.js', pkg.paths.dest.js + '/*.map'], function(err, paths) {
+    del([paths.dest.css, paths.source.root + '/app*'], function(err, paths) {
         var msg = 'Deleted files/folders:\n' + paths.join('\n');
         _.log(_.colors.yellow(msg));
 
@@ -89,13 +120,13 @@ gulp.task('clean', function(cb) {
 
 gulp.task('build', function(cb) {
     runSequence('clean',
-                ['css'],
+                ['css', 'js'],
                 cb);
 });
 
 gulp.task('nodemon', ['build'], function(cb) {
     var called = false;
-    return nodemon({script: pkg.main}).on('start', function() {
+    return nodemon({script: pkg.main, ext: 'js vash ejs jade', ignore: ['./client/**', './logs/**']}).on('start', function() {
         if (!called) {
             _.log(_.colors.green('Starting nodemon..'));
             called = true;
@@ -115,6 +146,6 @@ function reportChange(event){
 }
 
 gulp.task('default', ['browser-sync'], function() {
-    gulp.watch(pkg.paths.source.sassMain, ['sass', reload({stream: true})]).on('change', reportChange);
-    //gulp.watch(pkg.paths.source.js, ['js', reload({stream: true})]).on('change', reportChange);
+    gulp.watch(paths.source.sassMain, ['sass', reload({stream: true})]).on('change', reportChange);
+    gulp.watch(paths.source.js, ['', reload]).on('change', reportChange);
 });

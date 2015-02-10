@@ -70,16 +70,16 @@
             </div>
         </footer>
 
-        <script src="lib/system.js"></script>
-        <script src="config.js"></script>
 
         @if (model.isProd) {
+        <script src="app.min.js"></script>
         } else {
-        }
-
+        <script src="lib/system.js"></script>
+        <script src="config.js"></script>
         <script>
             System.import('app/main');
         </script>
+        }
 
         <!--
         <script>

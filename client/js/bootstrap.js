@@ -1,5 +1,6 @@
-import $ from 'jquery';
-import * as foundation from 'foundation';
+import 'modernizr';
+import 'fastclick';
+import 'foundation';
 
 export function bootstrap() {
     $(document).foundation();
