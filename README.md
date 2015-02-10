@@ -7,9 +7,11 @@ Starter template for a [Foundation](http://foundation.zurb.com/) based site runn
 
 ## Overview
 
-This is a starter / skeleton / boilerplate template for a Foundation site running on top of Express as the backend server technology.  The template is based on the [portfolio theme](http://foundation.zurb.com/templates/portfolio-theme.html) as demonstrated on Foundation's [HTML Templates](http://foundation.zurb.com/templates.html) page.
+This is a starter / skeleton / boilerplate template for a Foundation site running on top of Express as the backend server technology.  The initial demo layout is based on the [portfolio theme](http://foundation.zurb.com/templates/portfolio-theme.html) as demonstrated on Foundation's [HTML Templates](http://foundation.zurb.com/templates.html) page.
 
 It allows you to quickly setup a starting Foundation based site with reasonable defaults as well as typical server-side configurations when building Express-based sites.
+
+Sample site running on [Azure Websites](http://azure.microsoft.com/en-us/services/websites/) - [http://express-foundation-template.azurewebsites.net](http://express-foundation-template.azurewebsites.net)
 
 
 ## Requirements
@@ -46,13 +48,13 @@ npm install -g gulp
 - Make changes! Typically, the following files:
 
   ```
-  * server/views/layout.vash    - (main site structure)
-  * server/views/markdown.vash  - (partial template that serves Markdown files via markdown-serve)
-  * client/scss/app.scss        - (main Sass file used by site)
-  * client/js/*.js              - (site Javascript files - ES6 supported & recommended!)
-  * content/*.md                - (put your site content Markdown files here - it will be served up my markdown-serve. hint: symbolically link this to a folder on DropBox!)
-  * package.json                - (name, author, homepage, version..)
-  * common/common.js            - (header details that gets injected into compiled css & js on gulp build)
+  server/views/layout.vash    - (main site structure)
+  server/views/markdown.vash  - (partial template that serves Markdown files via markdown-serve)
+  client/scss/app.scss        - (main Sass file used by site)
+  client/js/*.js              - (site Javascript files - ES6 supported & recommended!)
+  content/*.md                - (put your site content Markdown files here - it will be served up my markdown-serve. hint: symbolically link this to a folder on DropBox!)
+  package.json                - (name, author, homepage, version..)
+  common/common.js            - (header details that gets injected into compiled css & js on gulp build)
   ```
 
 - `gulp` (default command) - builds, runs nodemon ([gulp-nodemon](https://github.com/JacksonGariety/gulp-nodemon)), then [BrowserSync](http://www.browsersync.io/), and should automatically serve up site at [http://localhost:3000](http://localhost:3000).
@@ -99,7 +101,7 @@ npm install -g gulp
 
 ### Other Notable Files
 
-- `web.config` - For production hosting with [iisnode](https://github.com/tjanczuk/iisnode) on Windows (not used on Linux)
+- `web.config` - For production hosting with [iisnode](https://github.com/tjanczuk/iisnode) on Windows or Azure Websites (not used on Linux)
 - `common/common.js` - Used by the gulp task in bundling & minifying CSS/JS files to inject header information. Change this to your details.
 
 
@@ -107,7 +109,7 @@ npm install -g gulp
 
 For production environment, a [self-executing bundle is created](https://github.com/jspm/jspm-cli/wiki/Production-Workflows#creating-a-self-executing-bundle) by transpiling into a single ES5 JS file (`/client/app.min.js`).  This file is referenced in the `/server/views/layout.vash` layout view and will be used when the prod flag is true.
 
-It is assumed that the contents of the repo will be deployed on a server that doesn't have `gulp` available so no gulp tasks will be run after deployment on the target server - thus no bundling or minifying.  All dev dependencies will not be installed (equivalent to `npm install --production`). Therefore, it is best to run `gulp build` to update all CSS & JS resources before pushing to production.
+It is assumed that the contents of the repo will be deployed on a server that doesn't have `jspm` or `gulp` available so no gulp tasks will be run after deployment on the target server - thus no bundling or minifying.  All dev dependencies will not be installed (equivalent to `npm install --production`). Therefore, it is best to run `gulp build` to update all CSS & JS resources before pushing to production.
 
 
 ## License
