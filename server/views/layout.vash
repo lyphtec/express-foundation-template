@@ -27,7 +27,7 @@
         <div class="small-12 medium-8 large-6 columns">
           <div class="nav-bar">
             <ul class="button-group">
-            <li><a href="#" class="button">About</a></li>
+            <li><a href="/about" class="button">About</a></li>
             <li><a href="#" class="button">Work</a></li>
             <li><a href="#" class="button">Contact</a></li>
             </ul>

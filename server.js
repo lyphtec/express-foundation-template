@@ -41,9 +41,15 @@ app.use(mds.middleware({
             return;
         }
 
-        var model = { content: markdownFile.parseContent(), version: pkg.version, isProd: req.app.locals.isProd };
+        var model = { content: markdownFile.parseContent(), version: pkg.version, isProd: req.app.locals.isProd, meta: markdownFile.meta };
 
-        res.render('markdown', model);
+        var view = 'markdown';  // default view
+        
+        // if content file specifies view, we use that instead
+        if (markdownFile.meta && markdownFile.meta.layout)
+            view = markdownFile.meta.layout;
+
+        res.render(view, model);
     }
 }));
 

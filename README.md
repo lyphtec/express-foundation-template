@@ -55,6 +55,7 @@ npm install -g gulp
   content/*.md                - (put your site content Markdown files here - it will be served up my markdown-serve. hint: symbolically link this to a folder on DropBox!)
   package.json                - (name, author, homepage, version..)
   common/common.js            - (header details that gets injected into compiled css & js on gulp build)
+  README.md                   - (what you are currently reading!)
   ```
 
 - `gulp` (default command) - builds, runs nodemon ([gulp-nodemon](https://github.com/JacksonGariety/gulp-nodemon)), then [BrowserSync](http://www.browsersync.io/), and should automatically serve up site at [http://localhost:3000](http://localhost:3000).
@@ -65,7 +66,7 @@ npm install -g gulp
 
 - [jspm](http://jspm.io/) for browser package management
 - [ES6 support](https://github.com/lukehoban/es6features) (since we are using jspm) - recommended way of writing client-side Javascript.
-- Sass (SCSS to be exact) via [gulp-sass](https://github.com/dlmanning/gulp-sass)
+- [Sass](http://www.sass-lang.com/) (SCSS to be exact) via [gulp-sass](https://github.com/dlmanning/gulp-sass) based on Foundation's [libsass workflow](http://foundation.zurb.com/docs/sass.html)
 
 ### Server-side
 
@@ -77,6 +78,7 @@ npm install -g gulp
 
 - [Gulp](http://gulpjs.com/) tasks:
   - *default* (i.e. `gulp` without any arguments) - builds, runs nodemon, BrowserSync, starts up browser pointing to [https://localhost:3000](https://localhost:3000), and watches for changes
+  - *watch* - same as `default` but without the `build` step
   - *build* - removes `/client/css/*` & `/client/app*` files, then runs `css` task to compile `/client/scss/app.scss` & minify resulting CSS file to `/client/css/app.min.css`, also runs the `js` task to transpile as single bundled ES5 `/client/app.js` file & minifies to `/client/app.min.js`
 - [BrowserSync](http://www.browsersync.io/) - automatic browser reloads when changes are detected during development
 
@@ -87,8 +89,8 @@ npm install -g gulp
 +---client      - ("public" site root)
 |   +---css     - (compiled SCSS destination - shouldn't require changes directly to files in this folder)
 |   +---images  - (client-side images used in website)
-|   +---js      - (client-side Javascript)
-|   +---lib     - (jspm_modules folder)
+|   +---js      - (client-side Javascript - ES6 modules FTW!)
+|   +---lib     - (jspm_modules folder - only used during development)
 |   +---scss    - (source SCSS files - gets compiled into /client/css folder)
 +---common      - (shared server & client Javascript files)
 +---content     - (Markdown site content files - used by markdown-serve)
@@ -101,22 +103,22 @@ npm install -g gulp
 
 ### Other Notable Files
 
-- `web.config` - For production hosting with [iisnode](https://github.com/tjanczuk/iisnode) on Windows or Azure Websites (not used on Linux)
+- `web.config` - For production hosting with [iisnode](https://github.com/tjanczuk/iisnode) on Windows or Azure Websites (not used on Linux). Refer to this [cheat sheet](http://microsoftazurewebsitescheatsheet.info/) for some useful options when hosting on Azure.
 - `common/common.js` - Used by the gulp task in bundling & minifying CSS/JS files to inject header information. Change this to your details.
 
 
 ## Production Deployment
 
-For production environment, a [self-executing bundle is created](https://github.com/jspm/jspm-cli/wiki/Production-Workflows#creating-a-self-executing-bundle) by transpiling into a single ES5 JS file (`/client/app.min.js`).  This file is referenced in the `/server/views/layout.vash` layout view and will be used when the prod flag is true.
+For production environment, a [self-executing bundle](https://github.com/jspm/jspm-cli/wiki/Production-Workflows#creating-a-self-executing-bundle) is created by transpiling into a single ES5 JS file (`/client/app.min.js`).  This file is referenced in the `/server/views/layout.vash` layout view and will be used when `NODE_ENV=production`.
 
-It is assumed that the contents of the repo will be deployed on a server that doesn't have `jspm` or `gulp` available so no gulp tasks will be run after deployment on the target server - thus no bundling or minifying.  All dev dependencies will not be installed (equivalent to `npm install --production`). Therefore, it is best to run `gulp build` to update all CSS & JS resources before pushing to production.
+It is assumed that the contents of the repo will be deployed on a server that doesn't have `jspm` or `gulp` available so no gulp tasks will be run after deployment on the target server - thus no bundling or minifying.  All jspm packages & npm dev dependencies will not be installed (equivalent to `npm install --production`). Therefore, it is best to run `gulp build` to update all CSS & JS resources before pushing to production.
 
 
 ## License
 
 (The MIT License)
 
-Copyright &copy; 2015 Nguyen Ly `<lyphtec [at] gmail [dot] com>`
+Copyright &copy; 2015 Nguyen Ly
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

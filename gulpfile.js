@@ -11,7 +11,7 @@ var del           = require('del'),
     browserSync   = require('browser-sync'),
     reload        = browserSync.reload,
     tap           = require('gulp-tap'),
-    runSequence   = require('run-sequence'),
+    runSequence   = require('run-sequence').use(gulp),
     exec          = require('child_process').exec,
     nodemon       = require('gulp-nodemon');
 
@@ -46,12 +46,6 @@ var _ = plug.loadUtils(['colors', 'env', 'log', 'date']);
 
 // Create comments for minified files
 var commentHeader = common.createComments(_);
-
-// Use a prod/dev switch
-// Run `gulp --production`
-var type = _.env.production ? 'production' : 'development';
-_.log('Building for', _.colors.magenta(type));
-_.beep();
 
 
 // TASKS
@@ -124,7 +118,7 @@ gulp.task('build', function(cb) {
                 cb);
 });
 
-gulp.task('nodemon', ['build'], function(cb) {
+gulp.task('nodemon', function(cb) {
     var called = false;
     return nodemon({script: pkg.main, ext: 'js vash ejs jade', ignore: ['./client/**', './logs/**']}).on('start', function() {
         if (!called) {
@@ -136,7 +130,7 @@ gulp.task('nodemon', ['build'], function(cb) {
 });
 
 gulp.task('browser-sync', ['nodemon'], function() {
-    browserSync.init(null, {
+    browserSync({
         proxy: 'http://localhost:5000'
     });
 });
@@ -145,7 +139,11 @@ function reportChange(event){
   _.log('File ' + _.colors.green(event.path) + ' was ' + _.colors.yellow(event.type) + ', running tasks...');
 }
 
-gulp.task('default', ['browser-sync'], function() {
+gulp.task('watch', ['browser-sync'], function() {
     gulp.watch(paths.source.sassMain, ['sass', reload({stream: true})]).on('change', reportChange);
     gulp.watch(paths.source.js, ['', reload]).on('change', reportChange);
+});
+
+gulp.task('default', function(cb) {
+    runSequence('build', 'watch', cb);
 });
