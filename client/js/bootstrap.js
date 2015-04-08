@@ -1,6 +1,7 @@
 import 'modernizr';
 import 'fastclick';
 import 'foundation';
+import $ from 'jquery';
 
 export function bootstrap() {
     $(document).foundation();
