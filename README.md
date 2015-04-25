@@ -4,7 +4,6 @@ Starter template for a [Foundation](http://foundation.zurb.com/) based site runn
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lyphtec/express-foundation-template?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-
 ## Overview
 
 This is a starter / skeleton / boilerplate template for a Foundation site running on top of Express as the backend server technology.  The initial demo layout is based on the [portfolio theme](http://foundation.zurb.com/templates/portfolio-theme.html) as demonstrated on Foundation's [HTML Templates](http://foundation.zurb.com/templates.html) page.
@@ -12,6 +11,9 @@ This is a starter / skeleton / boilerplate template for a Foundation site runnin
 It allows you to quickly setup a starting Foundation based site with reasonable defaults as well as typical server-side configurations when building Express-based sites.
 
 Sample site running on [Azure Websites](http://azure.microsoft.com/en-us/services/websites/) - [http://express-foundation-template.azurewebsites.net](http://express-foundation-template.azurewebsites.net)
+
+You can also
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/) yourself.
 
 
 ## Requirements
