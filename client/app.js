@@ -1410,7 +1410,7 @@ function define(){};  define.amd = {};
   var hasOwn = class2type.hasOwnProperty;
   var support = {};
   var document = window.document,
-      version = "2.1.3",
+      version = "2.1.4",
       jQuery = function(selector, context) {
         return new jQuery.fn.init(selector, context);
       },
@@ -1703,7 +1703,7 @@ function define(){};  define.amd = {};
     class2type["[object " + name + "]"] = name.toLowerCase();
   });
   function isArraylike(obj) {
-    var length = obj.length,
+    var length = "length" in obj && obj.length,
         type = jQuery.type(obj);
     if (type === "function" || jQuery.isWindow(obj)) {
       return false;
@@ -7287,7 +7287,7 @@ function define(){};  define.amd = {};
   };
   jQuery.fn.andSelf = jQuery.fn.addBack;
   if (typeof define === "function" && define.amd) {
-    System.register("github:components/jquery@2.1.3/jquery", [], false, function(__require, __exports, __module) {
+    System.register("github:components/jquery@2.1.4/jquery", [], false, function(__require, __exports, __module) {
       return (function() {
         return jQuery;
       }).call(this);
@@ -7330,14 +7330,14 @@ System.register("npm:fastclick@1.0.6", ["npm:fastclick@1.0.6/lib/fastclick"], tr
 
 (function() {
 function define(){};  define.amd = {};
-System.register("github:components/jquery@2.1.3", ["github:components/jquery@2.1.3/jquery"], false, function(__require, __exports, __module) {
+System.register("github:components/jquery@2.1.4", ["github:components/jquery@2.1.4/jquery"], false, function(__require, __exports, __module) {
   return (function(main) {
     return main;
-  }).call(this, __require('github:components/jquery@2.1.3/jquery'));
+  }).call(this, __require('github:components/jquery@2.1.4/jquery'));
 });
 })();
-System.register("github:zurb/bower-foundation@5.5.1/js/foundation/foundation", ["github:components/jquery@2.1.3"], false, function(__require, __exports, __module) {
-  System.get("@@global-helpers").prepareGlobal(__module.id, ["github:components/jquery@2.1.3"]);
+System.register("github:zurb/bower-foundation@5.5.2/js/foundation/foundation", ["github:components/jquery@2.1.4"], false, function(__require, __exports, __module) {
+  System.get("@@global-helpers").prepareGlobal(__module.id, ["github:components/jquery@2.1.4"]);
   (function() {
     "format global";
     "deps jquery";
@@ -7449,28 +7449,34 @@ System.register("github:zurb/bower-foundation@5.5.1/js/foundation/foundation", [
           bindLoad.call(image);
         }
       };
-      window.matchMedia = window.matchMedia || (function(doc) {
-        'use strict';
-        var bool,
-            docElem = doc.documentElement,
-            refNode = docElem.firstElementChild || docElem.firstChild,
-            fakeBody = doc.createElement('body'),
-            div = doc.createElement('div');
-        div.id = 'mq-test-1';
-        div.style.cssText = 'position:absolute;top:-100em';
-        fakeBody.style.background = 'none';
-        fakeBody.appendChild(div);
-        return function(q) {
-          div.innerHTML = '&shy;<style media="' + q + '"> #mq-test-1 { width: 42px; }</style>';
-          docElem.insertBefore(fakeBody, refNode);
-          bool = div.offsetWidth === 42;
-          docElem.removeChild(fakeBody);
+      window.matchMedia || (window.matchMedia = function() {
+        "use strict";
+        var styleMedia = (window.styleMedia || window.media);
+        if (!styleMedia) {
+          var style = document.createElement('style'),
+              script = document.getElementsByTagName('script')[0],
+              info = null;
+          style.type = 'text/css';
+          style.id = 'matchmediajs-test';
+          script.parentNode.insertBefore(style, script);
+          info = ('getComputedStyle' in window) && window.getComputedStyle(style, null) || style.currentStyle;
+          styleMedia = {matchMedium: function(media) {
+              var text = '@media ' + media + '{ #matchmediajs-test { width: 1px; } }';
+              if (style.styleSheet) {
+                style.styleSheet.cssText = text;
+              } else {
+                style.textContent = text;
+              }
+              return info.width === '1px';
+            }};
+        }
+        return function(media) {
           return {
-            matches: bool,
-            media: q
+            matches: styleMedia.matchMedium(media || 'all'),
+            media: media || 'all'
           };
         };
-      }(document));
+      }());
       (function(jQuery) {
         var animating,
             lastTime = 0,
@@ -7527,7 +7533,7 @@ System.register("github:zurb/bower-foundation@5.5.1/js/foundation/foundation", [
       }
       window.Foundation = {
         name: 'Foundation',
-        version: '5.5.1',
+        version: '5.5.2',
         media_queries: {
           'small': S('.foundation-mq-small').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
           'small-only': S('.foundation-mq-small-only').css('font-family').replace(/^[\/\\'"]+|(;\s?})+|[\/\\'"]+$/g, ''),
@@ -7699,14 +7705,25 @@ System.register("github:zurb/bower-foundation@5.5.1/js/foundation/foundation", [
             } else {
               var query = Foundation.media_queries[media];
               if (query !== undefined) {
-                Foundation.stylesheet.insertRule('@media ' + Foundation.media_queries[media] + '{ ' + rule + ' }');
+                Foundation.stylesheet.insertRule('@media ' + Foundation.media_queries[media] + '{ ' + rule + ' }', Foundation.stylesheet.cssRules.length);
               }
             }
           },
           image_loaded: function(images, callback) {
             var self = this,
                 unloaded = images.length;
-            if (unloaded === 0) {
+            function pictures_has_height(images) {
+              var pictures_number = images.length;
+              for (var i = pictures_number - 1; i >= 0; i--) {
+                if (images.attr('height') === undefined) {
+                  return false;
+                }
+                ;
+              }
+              ;
+              return true;
+            }
+            if (unloaded === 0 || pictures_has_height(images)) {
               callback(images);
             }
             images.each(function() {
@@ -7772,44 +7789,45 @@ System.register("github:zurb/bower-foundation@5.5.1/js/foundation/foundation", [
   return System.get("@@global-helpers").retrieveGlobal(__module.id, "Foundation");
 });
 
-System.register("github:zurb/bower-foundation@5.5.1", ["github:zurb/bower-foundation@5.5.1/js/foundation/foundation"], true, function(require, exports, module) {
+System.register("github:zurb/bower-foundation@5.5.2", ["github:zurb/bower-foundation@5.5.2/js/foundation/foundation"], true, function(require, exports, module) {
   var global = System.global,
       __define = global.define;
   global.define = undefined;
-  module.exports = require("github:zurb/bower-foundation@5.5.1/js/foundation/foundation");
+  module.exports = require("github:zurb/bower-foundation@5.5.2/js/foundation/foundation");
   global.define = __define;
   return module.exports;
 });
 
-System.register("app/bootstrap", ["github:Modernizr/Modernizr@2.8.3", "npm:fastclick@1.0.6", "github:zurb/bower-foundation@5.5.1", "github:components/jquery@2.1.3"], function (_export) {
+System.register('app/bootstrap', ['github:Modernizr/Modernizr@2.8.3', 'npm:fastclick@1.0.6', 'github:zurb/bower-foundation@5.5.2', 'github:components/jquery@2.1.4'], function (_export) {
+    'use strict';
+
     var $;
 
-    _export("bootstrap", bootstrap);
+    _export('bootstrap', bootstrap);
 
     function bootstrap() {
         $(document).foundation();
 
         var doc = document.documentElement;
-        doc.setAttribute("data-useragent", navigator.userAgent);
+        doc.setAttribute('data-useragent', navigator.userAgent);
     }
 
     return {
-        setters: [function (_githubModernizrModernizr283) {}, function (_npmFastclick106) {}, function (_githubZurbBowerFoundation551) {}, function (_githubComponentsJquery213) {
-            $ = _githubComponentsJquery213["default"];
+        setters: [function (_githubModernizrModernizr283) {}, function (_npmFastclick106) {}, function (_githubZurbBowerFoundation552) {}, function (_githubComponentsJquery214) {
+            $ = _githubComponentsJquery214['default'];
         }],
-        execute: function () {
-            "use strict";
-        }
+        execute: function () {}
     };
 });
-System.register("app/main", ["app/bootstrap"], function (_export) {
+System.register('app/main', ['app/bootstrap'], function (_export) {
+  'use strict';
+
   var bootstrap;
   return {
     setters: [function (_appBootstrap) {
       bootstrap = _appBootstrap.bootstrap;
     }],
     execute: function () {
-      "use strict";
 
       bootstrap();
     }
@@ -7817,69 +7835,107 @@ System.register("app/main", ["app/bootstrap"], function (_export) {
 });
 (function() {
   var loader = System;
-  var hasOwnProperty = loader.global.hasOwnProperty;
-  var moduleGlobals = {};
-  var curGlobalObj;
-  var ignoredGlobalProps;
   if (typeof indexOf == 'undefined')
     indexOf = Array.prototype.indexOf;
-  System.set("@@global-helpers", System.newModule({
+
+  function readGlobalProperty(p, value) {
+    var pParts = p.split('.');
+    while (pParts.length)
+      value = value[pParts.shift()];
+    return value;
+  }
+
+  var ignoredGlobalProps = ['sessionStorage', 'localStorage', 'clipboardData', 'frames', 'external'];
+
+  var hasOwnProperty = loader.global.hasOwnProperty;
+
+  function iterateGlobals(callback) {
+    if (Object.keys)
+      Object.keys(loader.global).forEach(callback);
+    else
+      for (var g in loader.global) {
+        if (!hasOwnProperty.call(loader.global, g))
+          continue;
+        callback(g);
+      }
+  }
+
+  function forEachGlobal(callback) {
+    iterateGlobals(function(globalName) {
+      if (indexOf.call(ignoredGlobalProps, globalName) != -1)
+        return;
+      try {
+        var value = loader.global[globalName];
+      }
+      catch(e) {
+        ignoredGlobalProps.push(globalName);
+      }
+      callback(globalName, value);
+    });
+  }
+
+  var moduleGlobals = {};
+
+  var globalSnapshot;
+
+  loader.set('@@global-helpers', loader.newModule({
     prepareGlobal: function(moduleName, deps) {
+      // first, we add all the dependency modules to the global
       for (var i = 0; i < deps.length; i++) {
         var moduleGlobal = moduleGlobals[deps[i]];
         if (moduleGlobal)
           for (var m in moduleGlobal)
             loader.global[m] = moduleGlobal[m];
       }
-      curGlobalObj = {};
-      ignoredGlobalProps = ["indexedDB", "sessionStorage", "localStorage", "clipboardData", "frames", "webkitStorageInfo"];
-      for (var g in loader.global) {
-        if (indexOf.call(ignoredGlobalProps, g) != -1) { continue; }
-        if (!hasOwnProperty || loader.global.hasOwnProperty(g)) {
-          try {
-            curGlobalObj[g] = loader.global[g];
-          } catch (e) {
-            ignoredGlobalProps.push(g);
-          }
-        }
-      }
+
+      // now store a complete copy of the global object
+      // in order to detect changes
+      globalSnapshot = {};
+      
+      forEachGlobal(function(name, value) {
+        globalSnapshot[name] = value;
+      });
     },
     retrieveGlobal: function(moduleName, exportName, init) {
       var singleGlobal;
       var multipleExports;
       var exports = {};
-      if (init) {
-        var depModules = [];
-        for (var i = 0; i < deps.length; i++)
-          depModules.push(require(deps[i]));
-        singleGlobal = init.apply(loader.global, depModules);
-      }
+
+      // run init
+      if (init)
+        singleGlobal = init.call(loader.global);
+
+      // check for global changes, creating the globalObject for the module
+      // if many globals, then a module object for those is created
+      // if one global, then that is the module directly
       else if (exportName) {
-        var firstPart = exportName.split(".")[0];
-        singleGlobal = eval.call(loader.global, exportName);
+        var firstPart = exportName.split('.')[0];
+        singleGlobal = readGlobalProperty(exportName, loader.global);
         exports[firstPart] = loader.global[firstPart];
       }
+
       else {
-        for (var g in loader.global) {
-          if (indexOf.call(ignoredGlobalProps, g) != -1)
-            continue;
-          if ((!hasOwnProperty || loader.global.hasOwnProperty(g)) && g != loader.global && curGlobalObj[g] != loader.global[g]) {
-            exports[g] = loader.global[g];
-            if (singleGlobal) {
-              if (singleGlobal !== loader.global[g])
-                multipleExports = true;
-            }
-            else if (singleGlobal !== false) {
-              singleGlobal = loader.global[g];
-            }
+        forEachGlobal(function(name, value) {
+          if (globalSnapshot[name] === value)
+            return;
+          if (typeof value === 'undefined')
+            return;
+          exports[name] = value;
+          if (typeof singleGlobal !== 'undefined') {
+            if (!multipleExports && singleGlobal !== value)
+              multipleExports = true;
           }
-        }
+          else {
+            singleGlobal = value;
+          }
+        });
       }
+
       moduleGlobals[moduleName] = exports;
+
       return multipleExports ? exports : singleGlobal;
     }
   }));
 })();
-
 });
 //# sourceMappingURL=app.js.map

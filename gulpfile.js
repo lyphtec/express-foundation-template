@@ -28,7 +28,7 @@ var paths = {
         ],
         sass: [
             './client/scss',
-            './client/lib/github/zurb/bower-foundation@5.5.1/scss'
+            './client/lib/github/zurb/bower-foundation@5.5.2/scss'
         ],
         sassMain: './client/scss/app.scss',
         js: './client/**/*.js',

@@ -3,6 +3,7 @@ iisnode
 obj/
 scratchpad.js
 client/lib/
+typings/
 
 #################
 ## Visual Studio

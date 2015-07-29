@@ -1,3 +1,5 @@
+/// <reference path="typings/tsd.d.ts"/>
+
 var express = require('express');
 var path = require('path');
 var os = require('os');
@@ -24,7 +26,6 @@ app.use(logger('dev'));
 app.use(methodOverride());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
-app.use(multer());
 app.use(express.static(path.join(__dirname, 'client')));
 
 // routes
